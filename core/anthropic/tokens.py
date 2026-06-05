@@ -2,18 +2,14 @@
 
 import json
 
-import tiktoken
 from loguru import logger
 
 from .content import get_block_attr
 
-ENCODER = tiktoken.get_encoding("cl100k_base")
-
-_DISALLOWED_SPECIAL: tuple[str, ...] = ()
-
 
 def _count_text_tokens(text: str) -> int:
-    return len(ENCODER.encode(text, disallowed_special=_DISALLOWED_SPECIAL))
+    # Simple local token estimation: roughly 1 token per 4 characters.
+    return max(1, len(str(text)) // 4)
 
 
 def get_token_count(
