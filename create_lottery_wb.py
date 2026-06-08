@@ -1,38 +1,43 @@
 import openpyxl
 from openpyxl.workbook import Workbook
 
-def create_lottery_workbook(filename="analisis_loteria.xlsx"):
+def create_lottery_workbook(filename="analisis_loteria_avanzado.xlsx"):
     wb = Workbook()
     ws = wb.active
-    ws.title = "Analisis"
+    ws.title = "Analisis_Avanzado"
 
-    # Encabezados
-    headers = ["Numero", "Fecha", "Frecuencia Relativa", "Media Movil (3)", "Prediccion Basica"]
+    # Encabezados mejorados
+    headers = ["ID", "Numero Ganador", "Fecha", "Frecuencia Relativa", "Media Movil (3)", "Desviacion Estandar", "Variacion vs Media"]
     ws.append(headers)
 
-    # Datos de ejemplo (simulando historicos)
-    # Rellenaremos con formulas para que sean dinamicas
-    for i in range(2, 22):
-        ws[f"A{i}"] = i * 2  # Simulación de números ganadores
-        ws[f"B{i}"] = f"2026-06-{i:02d}"
+    # Simulación de datos históricos (30 sorteos)
+    for i in range(2, 32):
+        row = i - 1
+        ws[f"A{i}"] = row
+        ws[f"B{i}"] = (i * 3) % 45 + 1  # Simulación más realista
+        ws[f"C{i}"] = f"2026-06-{i if i < 30 else 30:02d}"
 
-    # Fórmulas dinámicas (Ejemplos matemáticos comunes en auditoría de lotería)
+    # Fórmulas dinámicas
+    ws["H1"] = 30 # Total de sorteos
 
-    # Frecuencia relativa: Suponiendo total de 100 sorteos en otra celda fija
-    ws["G1"] = 100
-    for i in range(2, 22):
-        ws[f"C{i}"] = f"=A{i}/$G$1"
+    # Columna D: Frecuencia (proporción sobre total histórico)
+    for i in range(2, 32):
+        ws[f"D{i}"] = f"=B{i}/SUM($B$2:$B$31)"
 
-    # Media Móvil (3 periodos)
-    for i in range(4, 22):
-        ws[f"D{i}"] = f"=AVERAGE(A{i-2}:A{i})"
+    # Columna E: Media Móvil (3)
+    for i in range(4, 32):
+        ws[f"E{i}"] = f"=AVERAGE(B{i-2}:B{i})"
 
-    # Predicción básica (Tendencia lineal simple)
-    for i in range(2, 22):
-        ws[f"E{i}"] = f"=A{i}*1.05"
+    # Columna F: Desviación Estándar (muestra)
+    for i in range(4, 32):
+        ws[f"F{i}"] = f"=STDEV.S(B{i-2}:B{i})"
+
+    # Columna G: Variación (Diferencia porcentual con la media)
+    for i in range(4, 32):
+        ws[f"G{i}"] = f"=(B{i}-E{i})/E{i}"
 
     wb.save(filename)
-    print(f"Libro de trabajo '{filename}' creado exitosamente con fórmulas dinámicas.")
+    print(f"Libro de trabajo '{filename}' creado con éxito.")
 
 if __name__ == "__main__":
     create_lottery_workbook()
